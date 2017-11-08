@@ -54,58 +54,83 @@
        return flags & (1 << 9);
    }
    
-   
-   //asignacion de teclado (no me funciono usar CASE por eso recurri a usar if anidados)
+   //asignacion de teclado 
+   /*ATENCION
+    * cuando detecta un numero lo acumula en un vector de caracteres, cuando ve un simbolo diferente, 
+    * pasa los digitos guardados a un valor entero y vacia el vector, el valor entero se guarda en una
+    * variable a y el siguiente valor en variable b*/
 
-   int getScancode() {
+   void getScancode() {
         //variable que asigna el los valores obtenidos por inb()
         char c=inb(0x60); //0x64
-        char* numchar;
-        int numint = 0;
-        do {       //no te detengas!! realiza esta actividad
+        char numchar;
+        bool enter = false;
+        do {       //no te detengas!! realiza esta actividad...
             if(inb(0x60)!=c) {  //si no encuentra un valor 0
                 c=inb(0x60);    //reinicio a cero
                 if(c>0){        //si detecto un valor valido
                     switch(c){  //segun el valor encontrado
-                        case 0x02 : numchar = "1"; numint = 1;
+                        case 0x02 : numchar = '1';  
+                        terminal_putchar(numchar);                    
                         break;
-                        case 0x03 : numchar = "2"; numint = 2;
+                        case 0x03 : numchar = '2'; 
+                        terminal_putchar(numchar);
                         break;
-                        case 0x04 : numchar = "3"; numint = 3;
+                        case 0x04 : numchar = '3'; 
+                        terminal_putchar(numchar);
                         break;
-                        case 0x05 : numchar = "4"; numint = 4;
+                        case 0x05 : numchar = '4'; 
+                        terminal_putchar(numchar);
                         break;
-                        case 0x06 : numchar = "5"; numint = 5;
+                        case 0x06 : numchar = '5'; 
+                        terminal_putchar(numchar);
                         break;
-                        case 0x07 : numchar = "6"; numint = 6;
+                        case 0x07 : numchar = '6'; 
+                        terminal_putchar(numchar);
                         break;
-                        case 0x08 : numchar = "7"; numint = 7;
+                        case 0x08 : numchar = '7'; 
+                        terminal_putchar(numchar);
                         break;
-                        case 0x09 : numchar = "8"; numint = 8;
+                        case 0x09 : numchar = '8'; 
+                        terminal_putchar(numchar);
                         break;
-                        case 0x0A : numchar = "9"; numint = 9;
+                        case 0x0A : numchar = '9'; 
+                        terminal_putchar(numchar);
                         break;
-                        case 0x0B : numchar = "0"; numint = 0;
+                        case 0x0B : numchar = '0'; 
+                        terminal_putchar(numchar);
                         break;
-                        case 0x01 : numchar = " ";
+                        case 0x1F : numchar = 's';      //suma
+                        terminal_putchar(numchar);
+                        break;
+                        case 0x13 : numchar = 'r';      //resta
+                        terminal_putchar(numchar);
+                        break;
+                        case 0x32 : numchar = 'm';      //multiplica
+                        terminal_putchar(numchar);
+                        break;
+                        case 0x20 : numchar = 'd';      //divide
+                        terminal_putchar(numchar);
+                        break;
+                        case 0x39 : numchar = '_'; //ESPACE guarda los valores a en otra variable y se alista para valores b
+                        case 0x1C : enter = true;
+                        numchar = 0;
                         break;
                     }
                 }
-                terminal_writestring(numchar);
-                return numint;    //retorno el resultado de la operacion
             }
-        } while(1);  //has esta actividad al menos UNA VEZ
+        } while(enter != true);  //has esta actividad al menos UNA VEZ hasta que se presione ENTER
     }   
+
+       //menu
+   void menu(){
+    getScancode();
+   }
+
+    //Salto de linea
+    void salto_linea(int row){
+        terminal_row = terminal_row + row;
+    }
    
-  //Operacion
-  void operacion(){
-      int suma;
-      int a = getScancode();
-      int b = getScancode();
-      suma = a+b;
-      terminal_writestring("termina la suma");
-  }
-  //Salir
-  //menu
+  /*=========================================================================================================================================*/ 
    
-  /*
