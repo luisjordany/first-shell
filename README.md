@@ -1,3 +1,4 @@
+
 # first-shell
 here are code for make a simple shell  
 This code is basaded there shell versions on the Bare Bones kernel of Osdev.org, this code must be placed just before the following lines:
@@ -16,6 +17,7 @@ This code is basaded there shell versions on the Bare Bones kernel of Osdev.org,
      }
 
 == Credits: ==
+
 Luis jordany Chajil Patzan        0900-13-18667
 Gabriel Medardo Ortiz García      0900-11-8756
 Walfred Magdiel  Chipix  Tiniguar 0900-15-18006
