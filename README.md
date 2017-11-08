@@ -1,4 +1,5 @@
 
+
 # first-shell
 here are code for make a simple shell  
 This code is basaded there shell versions on the Bare Bones kernel of Osdev.org, this code must be placed just before the following lines:
@@ -15,6 +16,10 @@ This code is basaded there shell versions on the Bare Bones kernel of Osdev.org,
        terminal_writestring("menu \n 1.Operar 2.Salir");
        //<llama a la siguiente funcion>
      }
+
+
+For more information visit Wiki
+http://wikiumg.referata.com/wiki/Codigo_y_explicaci%C3%B3n_del_proyecto_final
 
 == Credits: ==
 
