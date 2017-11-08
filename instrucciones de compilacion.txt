@@ -1,0 +1,34 @@
+PARA CREAR EL ARCHIVO .iso SEGUIR LAS SIGUEINTES INSTRUCCIONES
+
+Tiene que tener los siguientes archivos
+* kernel.c
+* boot.s
+* linker.ld
+
+Despues de configurar el compilador cruzado, dirigirse a la carpeta de los arhivos desde el terminal y ejecutar lo siguiente
+
+//Kernel
+i686-elf-gcc -c kernel.c -o kernel.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+
+//Boot
+i686-elf-as boot.s -o boot.o
+
+//Linker
+i686-elf-gcc -T linker.ld -o myos.bin -ffreestanding -O2 -nostdlib boot.o kernel.o -lgcc
+
+//Verificacion de Grub con MyOS
+grub-file --is-x86-multiboot myos.bin
+
+
+mkdir -p isodir/boot/grub
+cp myos.bin isodir/boot/myos.bin
+cp grub.cfg isodir/boot/grub/grub.cfg
+grub-mkrescue -o myos.iso isodir
+
+//virtualizacio y emulacion
+qemu-system-i386 -kernel myos.bin   
+
+
+
+Para mas información visite la pagina de OSdev.org
+http://wiki.osdev.org/Expanded_Main_Page
