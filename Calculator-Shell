@@ -1,0 +1,111 @@
+  /*========================================================================================================================================*/ 
+   /*edicion para calculadora
+   *En este punto se lee todo el codigo que genera el 
+   *SHELL  de la calculadora*/
+   
+   /*uint8_t, uint8_t, uint8_t cuenta la asignacion de memoria en bytes*/
+
+   /*EAX es un resgistro de acumulacion extendido. Almacena el valor de retorno de una 
+    *funcion y lo utiliza como contenedor para operaciones matematicas sencillas*/
+   //estructura inb y outb
+   static inline uint8_t inb(uint16_t port) //inicia funcion que conectara con el driver del teclado
+   {
+       uint8_t ret; //crea la variable de respuesta
+       asm volatile ( "inb %1, %0"   //asignacion binaria de encendido y apagado del puerto
+                      : "=a"(ret)   //asigna la respuesta a la variable ret
+                      : "Nd"(port) ); //indicacion de las restricciones N(8-bit enteros no definidos, para instruciones de salida y entrada) y d(registros) para el dato obtenido por port
+       return ret;  //devulve el estado generado por la instruccion =a
+   }
+   /*la combinacion Nd genera la posibilidad de administrar espacios para ahorrar recursos*/
+   
+   static inline void outb(uint16_t port, uint8_t val)
+   {
+       asm volatile ( "outb %0, %1" : : "a"(val), "Nd"(port) );
+   }
+
+   //otras funciones
+   static inline uint32_t farpeekl(uint16_t sel, void* off)
+   {
+       uint32_t ret;
+       asm ( "push %%fs\n\t"
+             "mov  %1, %%fs\n\t"
+             "mov  %%fs:(%2), %0\n\t"
+             "pop  %%fs"
+             : "=r"(ret) : "g"(sel), "r"(off) );
+       return ret;
+   }
+
+   static inline void farpokeb(uint16_t sel, void* off, uint8_t v)
+   {
+       asm ( "push %%fs\n\t"
+             "mov  %0, %%fs\n\t"
+             "movb %2, %%fs:(%1)\n\t"
+             "pop %%fs"
+             : : "g"(sel), "r"(off), "r"(v) );
+       /* TODO: Should "memory" be in the clobber list here? */
+   }
+
+   static inline bool are_interrupts_enabled()
+   {
+       unsigned long flags;
+       asm volatile ( "pushf\n\t"
+                      "pop %0"
+                      : "=g"(flags) );
+       return flags & (1 << 9);
+   }
+   
+   
+   //asignacion de teclado (no me funciono usar CASE por eso recurri a usar if anidados)
+
+   int getScancode() {
+        //variable que asigna el los valores obtenidos por inb()
+        char c=inb(0x60); //0x64
+        char* numchar;
+        int numint = 0;
+        do {       //no te detengas!! realiza esta actividad
+            if(inb(0x60)!=c) {  //si no encuentra un valor 0
+                c=inb(0x60);    //reinicio a cero
+                if(c>0){        //si detecto un valor valido
+                    switch(c){  //segun el valor encontrado
+                        case 0x02 : numchar = "1"; numint = 1;
+                        break;
+                        case 0x03 : numchar = "2"; numint = 2;
+                        break;
+                        case 0x04 : numchar = "3"; numint = 3;
+                        break;
+                        case 0x05 : numchar = "4"; numint = 4;
+                        break;
+                        case 0x06 : numchar = "5"; numint = 5;
+                        break;
+                        case 0x07 : numchar = "6"; numint = 6;
+                        break;
+                        case 0x08 : numchar = "7"; numint = 7;
+                        break;
+                        case 0x09 : numchar = "8"; numint = 8;
+                        break;
+                        case 0x0A : numchar = "9"; numint = 9;
+                        break;
+                        case 0x0B : numchar = "0"; numint = 0;
+                        break;
+                        case 0x01 : numchar = " ";
+                        break;
+                    }
+                }
+                terminal_writestring(numchar);
+                return numint;    //retorno el resultado de la operacion
+            }
+        } while(1);  //has esta actividad al menos UNA VEZ
+    }   
+   
+  //Operacion
+  void operacion(){
+      int suma;
+      int a = getScancode();
+      int b = getScancode();
+      suma = a+b;
+      terminal_writestring("termina la suma");
+  }
+  //Salir
+  //menu
+   
+  /*
