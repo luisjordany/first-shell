@@ -17,11 +17,12 @@
    #endif
 
    /*================================*/
-    //cadena de operaciones 
-   const char* cadenaA;
-   int primer_termino;
-   int segundo_termino;
-   char operando;
+    //cadena de operaciones
+    char letra = 'n';
+    int valor_temporal = 0;
+    bool cambio_de_termino = false;
+    int primer_termino;
+    int segundo_termino;
    /*================================*/
 
    /* Hardware text mode color constants. */
@@ -110,19 +111,7 @@
   /*========================================================================================================================================*/ 
    /*edicion para calculadora
    *En este punto se lee todo el codigo que genera el 
-   *SHELL  de la calculadora*/
-
-    //borrar un caracter
-    void borrar(){
-        int x = terminal_row;
-        terminal_row = x-1;
-        char* aux = cadenaA[1];
-        for(int i = 1; i< strlen(cadenaA)-1; i++){
-            char* aux2 = aux;
-            aux = cadenaA[i] + aux2;
-        }
-    }
-   
+   *SHELL  de la calculadora*/   
     //Salto de linea
     void salto_linea(int row){
         terminal_row = terminal_row + row;
@@ -146,29 +135,22 @@
             ponte_en(x,i);
             terminal_writestring(" ");
         }
-        cadenaA=0;
     }
 
     //pasa a conversor
-    int posicion_decimal(int x, int i){     //coloca el valor en el orden decimal correcto
-        for(int j = 1; j<i; j++){
-            x= x*10;
+    int posicion_decimal(int numero, int posicion){     //coloca el valor en el orden decimal correcto
+        int valor_absoluto;
+        if(posicion = 0){
+            valor_absoluto = numero;
+        }else{
+                int aux = valor_absoluto;       //guarda el valor anterior
+                for(int j = 1; j<posicion; j++){
+                    aux = aux * 10;             //convierte en su multiplo siguiente
+                }
+                valor_absoluto= aux + numero;      //suma el nuevo numero como unidad y agrega el multiplo
         }
+        return valor_absoluto;
     }
-    void conversor(){   //convierte la cadena en un entero y lo pasa al termino que queda
-    }
-
-   //valida el caracter antes de incluirlo a la pila
-   void acumulador(char letra, bool corte){   //corte indica si el dato es correcto
-    if(corte == false){
-        char* cadenaB;
-        cadenaB= cadenaA;
-        cadenaA = cadenaB + letra;
-    }else{
-        operando = letra;
-        conversor();
-    }
-   }
 
    /*EAX es un resgistro de acumulacion extendido. Almacena el valor de retorno de una 
     *funcion y lo utiliza como contenedor para operaciones matematicas sencillas*/
@@ -209,6 +191,27 @@
              : : "g"(sel), "r"(off), "r"(v) );
        /* TODO: Should "memory" be in the clobber list here? */
    }
+   
+   void asigna_valor(int numero, int posicion){     //Asigna el asigna_valor(1, numint); en la pocicion multiplo de 10
+        if(cambio_de_termino == false){
+            valor_temporal = posicion_decimal(numero, posicion);
+        }
+    }
+
+    void asigna_operando(char operando){        //asigna el operador
+        letra = operando;
+    }
+
+    void borrar_caracter(){   //borra cada termino
+        int tmp = terminal_column;
+        terminal_column = tmp -1;
+        terminal_writestring(" ");
+        if(letra != 'n' && cambio_de_termino == false){     //si se escribio una letra antes de activar el cambio de termino
+            letra= 'n';
+        }else{
+            valor_temporal = valor_temporal/10;
+        }
+    }
 
    static inline bool are_interrupts_enabled()
    {
@@ -221,88 +224,81 @@
    
    //asignacion de teclado 
    /*ATENCION
-    * cuando detecta un numero lo acumula en un vector de caracteres, cuando ve un simbolo diferente, 
+    * cuando detecta un asigna_valor(1, numint); lo acumula en un vector de caracteres, cuando ve un simbolo diferente, 
     * pasa los digitos guardados a un valor entero y vacia el vector, el valor entero se guarda en una
     * variable a y el siguiente valor en variable b*/
 
    void getScancode() {
         //variable que asigna el los valores obtenidos por inb()
         char c=inb(0x60); //0x64
-        char numchar;
+        int numint = 0;
         bool enter = false;
         do {       //no te detengas!! realiza esta actividad...
             if(inb(0x60)!=c) {  //si no encuentra un valor 0
                 c=inb(0x60);    //reinicio a cero
                 if(c>0){        //si detecto un valor valido
                     switch(c){  //segun el valor encontrado
-                        case 0x02 : numchar = '1'; 
-                        acumulador(numchar, false);
-                        terminal_putchar(numchar);                    
+                        case 0x02 : asigna_valor(1, numint);
+                        terminal_putchar('1');                    
                         break;
-                        case 0x03 : numchar = '2'; 
-                        acumulador(numchar, false);
-                        terminal_putchar(numchar);
+                        case 0x03 : asigna_valor(2, numint); 
+                        terminal_putchar('2');
                         break;
-                        case 0x04 : numchar = '3'; 
-                        acumulador(numchar, false);
-                        terminal_putchar(numchar);
+                        case 0x04 : asigna_valor(3, numint); 
+                        terminal_putchar('3');
                         break;
-                        case 0x05 : numchar = '4';
-                        acumulador(numchar, false); 
-                        terminal_putchar(numchar);
+                        case 0x05 : asigna_valor(4, numint);  
+                        terminal_putchar('4');
                         break;
-                        case 0x06 : numchar = '5'; 
-                        acumulador(numchar, false);
-                        terminal_putchar(numchar);
+                        case 0x06 : asigna_valor(5, numint);  
+                        terminal_putchar('5');
                         break;
-                        case 0x07 : numchar = '6'; 
-                        acumulador(numchar, false);
-                        terminal_putchar(numchar);
+                        case 0x07 : asigna_valor(6, numint);  
+                        terminal_putchar('6');
                         break;
-                        case 0x08 : numchar = '7'; 
-                        acumulador(numchar, false);
-                        terminal_putchar(numchar);
+                        case 0x08 : asigna_valor(7, numint);  
+                        terminal_putchar('7');
                         break;
-                        case 0x09 : numchar = '8'; 
-                        acumulador(numchar, false);
-                        terminal_putchar(numchar);
+                        case 0x09 : asigna_valor(8, numint);  
+                        terminal_putchar('8');
                         break;
-                        case 0x0A : numchar = '9';
-                        acumulador(numchar, false); 
-                        terminal_putchar(numchar);
+                        case 0x0A : asigna_valor(9, numint);  
+                        terminal_putchar('9');
                         break;
-                        case 0x0B : numchar = '0'; 
-                        acumulador(numchar, false);
-                        terminal_putchar(numchar);
+                        case 0x0B : asigna_valor(0, numint); 
+                        terminal_putchar('0');
                         break;
-                        case 0x1F : numchar = 's';      //suma
-                        acumulador('s',true);
-                        terminal_putchar(numchar);
+                        case 0x1F : asigna_operando('s');      //suma
+                        terminal_putchar('s');
                         break;
-                        case 0x13 : numchar = 'r';      //resta
-                        acumulador('r',true);
-                        terminal_putchar(numchar);
+                        case 0x13 : asigna_operando('r');      //resta
+                        terminal_putchar('r');
                         break;
-                        case 0x32 : numchar = 'm';      //multiplica
-                        acumulador('m',true);
-                        terminal_putchar(numchar);
+                        case 0x32 : asigna_operando('m');      //multiplica
+                        terminal_putchar('m');
                         break;
-                        case 0x20 : numchar = 'd';      //divide
-                        acumulador('d',true);
-                        terminal_putchar(numchar);
+                        case 0x20 : asigna_operando('d');      //divide
+                        terminal_putchar('d');
                         break;
-                        /*case 0x39  : numchar = '_'; //ESPACE guarda los valores a en otra variable y se alista para valores b
-                        acumulador('_',true);
-                        terminal_putchar(numchar);
-                        break;*/
-                        case 0x1C : enter = true;
-                        numchar = 0;
+                        case 0x8E : borrar_caracter(); //proceso de retorno o borrado
+                        case 0x1C : enter = true;       //presiona ENTER
                         break;
                     }
                 }
-            }
+            }numint ++;
         } while(enter != true);  //has esta actividad al menos UNA VEZ hasta que se presione ENTER
     }  
+
+    //imprime el resultado en cadena
+    void int_to_string(int resultado){
+        static char num[] = "0123456789"
+        //do{
+            for(int i=0; i<10; i++){
+                if(resultado == i)
+                terminal_putchar(num[i]);
+            }
+        //}while();
+    }
     
     //calculadora
     void suma(){
@@ -315,12 +311,45 @@
         terminal_writestring("el resultado de su resta es de: " + resultado);
     }
 
+    void multiplicacion(){
+        int resultado = primer_termino * segundo_termino;
+        terminal_writestring("el resultado de su resta es de  " + resultado);
+    }
+
+    void divicion(){
+        if(primer_termino != 0){
+            int resultado = primer_termino/segundo_termino;
+            terminal_writestring("el resultado de su resta es de " + resultado);
+        }else{
+            terminal_writestring("operacion iinvalida!");
+        }
+    }
+
     calculadora(){
+        valor_temporal =0;
+        primer_termino = 0;
+        segundo_termino = 0;
+        letra = 'n';
         terminal_initialize();
-        terminal_writestring("ingrese primer termino");
+        terminal_writestring("ingrese primer termino ");
         getScancode();
-        terminal_writestring("ingrese segundo termino")
+        primer_termino = valor_temporal;
+        valor_temporal = 0;
+        ponte_en(0,3);
+        terminal_writestring("asigne operador ");
+        cambio_de_termino = true;
         getScancode();
+        ponte_en(0,6);
+        terminal_writestring("ingrese segundo termino");
+        getScancode();
+        segundo_termino = valor_temporal;
+        valor_temporal=0;
+        if(letra=='s'){
+            suma();
+        }
+        if(letra=='r'){
+            resta();
+        }
     }
     
 
@@ -328,13 +357,17 @@
    void menu(){
     bool y = false;
     do{             //repite hasta que sea un valor valido
-        cadenaA = 0;
         getScancode();
-        switch(cadenaA[0]){
+        switch(valor_temporal){
             case 1 : calculadora(); y=true;
-            case 2 : salir(); y=true;
+            break;
+            case 2 : terminal_writestring("En contruccion :( "); y=true;
+            break;
             default: ponte_en(1,7); terminal_writestring("caracter no valido");
-    }while(y!=true);
+                        valor_temporal = 0; borrar_caracter();
+            break;
+            }
+        }while(y!=true);
     }
    
   /*=========================================================================================================================================*/ 
@@ -348,7 +381,7 @@
     
        /* Newline support is left as an exercise. */
        terminal_writestring("Hola , Somos el grupo Open suse! Luis Chajil ");
-       ponte_en(0,3);
+       ponte_en(3,3);
        terminal_writestring("MENU 1.Operar 2.Salir");
        ponte_en(3,5);
        menu();
